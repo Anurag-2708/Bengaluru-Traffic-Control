@@ -1,5 +1,5 @@
-# Use a stable Python base image (Python 3.11 satisfies modern packages like Altair)
-FROM python:3.11-slim
+# Use a stable Python base image (Python 3.12 satisfies modern packages like SciPy 1.18.0 & Altair)
+FROM python:3.12-slim
 
 # Install system dependencies required for osmium and compilation
 RUN apt-get update && apt-get install -y --no-install-recommends \
