@@ -1,0 +1,158 @@
+{
+    "duration": {
+        "lgb": {
+            "mae": 48.612709077044634,
+            "rmse": 83.9381820934136,
+            "r2": 0.29475620675685343
+        },
+        "xgb": {
+            "mae": 50.56761939164703,
+            "rmse": 86.93163036412652,
+            "r2": 0.24355770470981353
+        },
+        "ensemble": {
+            "mae": 48.23338280658685,
+            "rmse": 83.92253466003528,
+            "r2": 0.2950191199250948
+        }
+    },
+    "severity": {
+        "lgb": {
+            "mae": 0.33841893259722483,
+            "rmse": 0.6104511447624531,
+            "r2": 0.6173109089594824
+        },
+        "xgb": {
+            "mae": 0.3785484989344136,
+            "rmse": 0.6620995798311385,
+            "r2": 0.5498151434902453
+        },
+        "ensemble": {
+            "mae": 0.35166120844796817,
+            "rmse": 0.6257407819775659,
+            "r2": 0.5979008282518994
+        }
+    },
+    "correlations": {
+        "latitude": {
+            "latitude": 1.0,
+            "longitude": 0.10089249124335932,
+            "hour": 0.046633103416375415,
+            "day_of_week": 0.021238935608593683,
+            "month": 0.060602459583154585,
+            "event_type_encoded": 0.0263012524004601,
+            "event_cause_encoded": 0.04360472907682237,
+            "police_station_encoded": 0.23766962055666824,
+            "priority_encoded": 0.08052640540315935,
+            "requires_road_closure_encoded": 0.021190473511564063
+        },
+        "longitude": {
+            "latitude": 0.10089249124335932,
+            "longitude": 1.0,
+            "hour": 0.03737340295405903,
+            "day_of_week": 0.0147618980492926,
+            "month": 0.00402372357304158,
+            "event_type_encoded": 0.11383393146031125,
+            "event_cause_encoded": 0.04660671764545414,
+            "police_station_encoded": 0.18937746416184378,
+            "priority_encoded": 0.11160888118997385,
+            "requires_road_closure_encoded": 0.01836969463883179
+        },
+        "hour": {
+            "latitude": 0.046633103416375415,
+            "longitude": 0.03737340295405903,
+            "hour": 1.0,
+            "day_of_week": 0.006441628185608808,
+            "month": 0.07690444411584833,
+            "event_type_encoded": 0.012230656478275955,
+            "event_cause_encoded": 0.03683835239768742,
+            "police_station_encoded": 0.04773226613205428,
+            "priority_encoded": 0.010896680304491833,
+            "requires_road_closure_encoded": 0.06466452206443485
+        },
+        "day_of_week": {
+            "latitude": 0.021238935608593683,
+            "longitude": 0.0147618980492926,
+            "hour": 0.006441628185608808,
+            "day_of_week": 1.0,
+            "month": 0.017758713914433476,
+            "event_type_encoded": 0.008860793958504773,
+            "event_cause_encoded": 0.0066504875771196655,
+            "police_station_encoded": 0.020010811878860103,
+            "priority_encoded": 0.010717940341234694,
+            "requires_road_closure_encoded": 0.006733664616041449
+        },
+        "month": {
+            "latitude": 0.060602459583154585,
+            "longitude": 0.00402372357304158,
+            "hour": 0.07690444411584833,
+            "day_of_week": 0.017758713914433476,
+            "month": 1.0,
+            "event_type_encoded": 0.05372362912547998,
+            "event_cause_encoded": 0.03086282083099613,
+            "police_station_encoded": 0.05796816701307398,
+            "priority_encoded": 0.02066013213999065,
+            "requires_road_closure_encoded": 0.0006689336899091938
+        },
+        "event_type_encoded": {
+            "latitude": 0.0263012524004601,
+            "longitude": 0.11383393146031125,
+            "hour": 0.012230656478275955,
+            "day_of_week": 0.008860793958504773,
+            "month": 0.05372362912547998,
+            "event_type_encoded": 1.0,
+            "event_cause_encoded": 0.42711371995681274,
+            "police_station_encoded": 0.006082791934434407,
+            "priority_encoded": 0.03667584915106087,
+            "requires_road_closure_encoded": 0.24210432353170658
+        },
+        "event_cause_encoded": {
+            "latitude": 0.04360472907682237,
+            "longitude": 0.04660671764545414,
+            "hour": 0.03683835239768742,
+            "day_of_week": 0.0066504875771196655,
+            "month": 0.03086282083099613,
+            "event_type_encoded": 0.42711371995681274,
+            "event_cause_encoded": 1.0,
+            "police_station_encoded": 0.0657676243374828,
+            "priority_encoded": 0.0640375055889944,
+            "requires_road_closure_encoded": 0.14718504945069527
+        },
+        "police_station_encoded": {
+            "latitude": 0.23766962055666824,
+            "longitude": 0.18937746416184378,
+            "hour": 0.04773226613205428,
+            "day_of_week": 0.020010811878860103,
+            "month": 0.05796816701307398,
+            "event_type_encoded": 0.006082791934434407,
+            "event_cause_encoded": 0.0657676243374828,
+            "police_station_encoded": 1.0,
+            "priority_encoded": 0.06863180631771759,
+            "requires_road_closure_encoded": 0.017783108497168878
+        },
+        "priority_encoded": {
+            "latitude": 0.08052640540315935,
+            "longitude": 0.11160888118997385,
+            "hour": 0.010896680304491833,
+            "day_of_week": 0.010717940341234694,
+            "month": 0.02066013213999065,
+            "event_type_encoded": 0.03667584915106087,
+            "event_cause_encoded": 0.0640375055889944,
+            "police_station_encoded": 0.06863180631771759,
+            "priority_encoded": 1.0,
+            "requires_road_closure_encoded": 0.11653682041251846
+        },
+        "requires_road_closure_encoded": {
+            "latitude": 0.021190473511564063,
+            "longitude": 0.01836969463883179,
+            "hour": 0.06466452206443485,
+            "day_of_week": 0.006733664616041449,
+            "month": 0.0006689336899091938,
+            "event_type_encoded": 0.24210432353170658,
+            "event_cause_encoded": 0.14718504945069527,
+            "police_station_encoded": 0.017783108497168878,
+            "priority_encoded": 0.11653682041251846,
+            "requires_road_closure_encoded": 1.0
+        }
+    }
+}

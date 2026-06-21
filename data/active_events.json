@@ -1,0 +1,29 @@
+{
+    "EV_0621_071653": {
+        "id": "EV_0621_071653",
+        "event_type": "unplanned",
+        "event_cause": "vehicle_breakdown",
+        "latitude": 13.0356,
+        "longitude": 77.5941,
+        "priority": "High",
+        "requires_road_closure": true,
+        "severity_index": 4.57,
+        "duration_mins": 61.21,
+        "congestion_level": "Moderate",
+        "impact_radius_km": 0.91,
+        "response_time_mins": 12.25,
+        "dispatches": [
+            {
+                "station_name": "Hebbala",
+                "officers": 8,
+                "barricades": 14,
+                "vehicles": 3,
+                "transit_distance_km": 1.46
+            }
+        ],
+        "alternative_paths": [],
+        "start_datetime_ist": "2026-06-21T07:16:17.573Z",
+        "deployed_at": "2026-06-21T12:46:53.072951",
+        "status": "Live Event"
+    }
+}

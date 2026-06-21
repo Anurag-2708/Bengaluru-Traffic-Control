@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GridGuard — Astram Event Co-Pilot</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+
+  <!-- App Styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Favicon (inline data URI — amber shield) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23F2A33B'/><text x='16' y='23' text-anchor='middle' font-size='18' font-family='sans-serif' font-weight='bold' fill='%2310141A'>G</text></svg>">
+</head>
+<body>
+  <div class="app">
+
+    <!-- ═══ Header ═══════════════════════════════════════ -->
+    <header>
+      <div class="brand">
+        <div class="brand-mark">
+          <span class="shield">G</span>
+          GRIDGUARD
+        </div>
+        <div class="brand-tagline">Traffic Incident & Event Co-Pilot</div>
+      </div>
+      <div class="header-right">
+        <span class="agency-label">Bengaluru Traffic Police · Live</span>
+        <div class="live-indicator">
+          <span class="live-dot"></span>
+          <span>Live</span>
+        </div>
+        <button class="station-stats-btn" id="stationStatsBtn" type="button">Station Stats</button>
+        <button class="chat-launch-btn" id="chatLaunchBtn" type="button">Ask AI</button>
+        <div class="clock" id="clock">00:00:00</div>
+      </div>
+    </header>
+
+    <!-- ═══ Main Content ═════════════════════════════════ -->
+    <main>
+
+      <!-- Map -->
+      <div id="map"></div>
+
+      <!-- Sidebar Resizer Divider -->
+      <div class="resizer" id="sidebarResizer"></div>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+
+        <!-- Tab Bar -->
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="queue">
+            <span>⊞</span> Queue
+          </button>
+          <button class="tab-btn" data-tab="charts">
+            <span>◔</span> City Trends
+          </button>
+          <button class="tab-btn" data-tab="heatmap" id="tabBtnHeatmap">
+            <span>♨</span> Heatmap
+          </button>
+          <button class="tab-btn" data-tab="detail" id="tabBtnDetail" style="display:none;">
+            <span>✦</span> Details
+          </button>
+        </div>
+
+        <!-- Queue Section -->
+        <div id="queueSection" class="active" style="display:flex;">
+          <div class="section-head">
+            Priority Queue
+            <span class="count-badge" id="queueCount">0</span>
+          </div>
+          
+          <!-- Granularity Slider -->
+          <div class="slider-card" id="granularitySliderCard">
+            <div class="slider-title-row">
+              <span class="slider-label">Hotspot Granularity</span>
+              <span class="slider-val" id="minSamplesVal">20</span>
+            </div>
+            <input type="range" id="minSamplesSlider" min="5" max="150" step="5" value="20" class="slider-input">
+            <div class="slider-desc">
+              <span>Finer Hotspots (Local)</span>
+              <span>Major Hotspots (Macro)</span>
+            </div>
+          </div>
+
+          <div class="queue-list" id="queueList">
+            <!-- Skeleton loaders while data loads -->
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+          </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div id="chartsSection" style="display:none;">
+          <div class="section-head">City Analytics</div>
+          <div class="chart-type-selector" id="chartTypeSelector">
+            <!-- Populated by JS -->
+          </div>
+          <div class="chart-container">
+            <canvas id="chartCanvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Details Section -->
+        <div id="detailSection" style="display:none;">
+          <div class="detail-header-card" id="detailHeaderCard">
+            <div class="detail-title-row">
+              <span class="detail-name" id="detailName">Area Cluster</span>
+              <button class="detail-close-btn" id="detailCloseBtn" title="Back to Queue">×</button>
+            </div>
+            <div class="detail-meta-grid">
+              <div class="detail-meta-item">
+                <span class="meta-label">Station</span>
+                <span class="meta-value" id="detailStation">—</span>
+              </div>
+              <div class="detail-meta-item">
+                <span class="meta-label">Events</span>
+                <span class="meta-value" id="detailViolations">—</span>
+              </div>
+              <div class="detail-meta-item">
+                <span class="meta-label">Peak Hour</span>
+                <span class="meta-value" id="detailPeakHour">—</span>
+              </div>
+              <div class="detail-meta-item">
+                <span class="meta-label">Dominant Cause</span>
+                <span class="meta-value" id="detailDominantType">—</span>
+              </div>
+              <div class="detail-meta-item">
+                <span class="meta-label">Dominant Vehicle</span>
+                <span class="meta-value" id="detailDominantVehicle">—</span>
+              </div>
+              <div class="detail-meta-item detail-score-wrap">
+                <span class="meta-label">Zone Score</span>
+                <span class="meta-value score-badge" id="detailScore">—</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="section-head">Zone Analytics</div>
+          <div class="chart-type-selector" id="detailChartTypeSelector">
+            <!-- Populated by JS -->
+          </div>
+          <div class="chart-container">
+            <canvas id="detailChartCanvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Heatmap Section -->
+        <div id="heatmapSection" style="display:none; flex-direction:column; gap:16px;">
+          <div class="section-head">Heatmap Analytics</div>
+
+          <div class="slider-card" id="heatmapSliderCard">
+            <div class="slider-title-row">
+              <span class="slider-label">Timeline Range</span>
+              <span class="slider-val" id="heatmapTimelineVal">All Data</span>
+            </div>
+            <input type="range" id="heatmapTimelineSlider" min="0" max="6" step="1" value="0" class="slider-input">
+            <div class="slider-desc" id="heatmapTimelineTicks">
+              <span>All</span>
+              <span>Nov '23</span>
+              <span>Dec '23</span>
+              <span>Jan '24</span>
+              <span>Feb '24</span>
+              <span>Mar '24</span>
+              <span>Apr '24</span>
+            </div>
+          </div>
+
+          <div class="heatmap-summary-card">
+            <div class="panel-title" style="font-size:12px; margin-bottom:8px; border-left: 2px solid var(--accent-blue); padding-left: 8px;">Time Range Summary</div>
+            <div class="compare-card-stat">
+              <span class="compare-stat-label">Active Events</span>
+              <span class="compare-stat-val blue" id="heatmapSummaryCount">—</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /sidebar -->
+    </main>
+
+    <!-- ═══ Stats Footer ═════════════════════════════════ -->
+    <footer class="stats-bar">
+      <div class="stat-item">
+        <span class="stat-label">Total Events</span>
+        <span class="stat-value amber" id="statViolations">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Clusters Detected</span>
+        <span class="stat-value red" id="statClusters">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Trending Zones <span class="note" style="opacity: 0.65; font-size: 10px;">(Blinking Points = Rising Areas)</span></span>
+        <span class="stat-value green" id="statTrending">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Date Range</span>
+        <span class="stat-value blue" id="statDateRange">—</span>
+      </div>
+    </footer>
+
+    <!-- ═══ Chat Overlay ═════════════════════════════════ -->
+    <div class="chat-overlay" id="chatOverlay" aria-hidden="true">
+      <div class="chat-backdrop" id="chatBackdrop"></div>
+      <section class="chat-window" role="dialog" aria-modal="true" aria-labelledby="chatWindowTitle">
+        <div class="chat-window-header">
+          <div>
+            <div class="section-head" id="chatWindowTitle">Ask GridGuard</div>
+            <div class="chat-window-subtitle">Expanded overlay for analysis, triage, and follow-up questions</div>
+          </div>
+          <button class="chat-close-btn" id="chatCloseBtn" type="button" aria-label="Close chat">×</button>
+        </div>
+        <div class="chat-window-body">
+          <div class="chips-container" id="chipsContainer">
+            <!-- Populated by JS -->
+          </div>
+          <div class="chat-log" id="chatLog">
+            <!-- Messages appended by JS -->
+          </div>
+          <div class="input-row">
+            <span class="prompt-sym">›</span>
+            <input type="text"
+                   class="chat-input"
+                   id="chatInput"
+                   placeholder="Ask about events, hotspots, trends…"
+                   autocomplete="off"
+                   spellcheck="false">
+            <button class="ask-btn" id="askBtn">Ask</button>
+          </div>
+          <div class="chat-footnote">GridGuard AI · Powered by traffic event analytics</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ═══ Station Stats Overlay ════════════════════════ -->
+    <div class="stats-overlay" id="statsOverlay" aria-hidden="true" style="display:none;">
+      <div class="stats-backdrop" id="statsBackdrop"></div>
+      <section class="stats-window" role="dialog" aria-modal="true" aria-labelledby="statsWindowTitle">
+        <div class="stats-window-header">
+          <div>
+            <div class="section-head" id="statsWindowTitle">Police Station Analytics</div>
+            <div class="stats-window-subtitle">City-wide station rankings and side-by-side comparison tools</div>
+          </div>
+          <button class="stats-close-btn" id="statsCloseBtn" type="button" aria-label="Close stats">×</button>
+        </div>
+        <div class="stats-window-body">
+          
+          <div class="stats-grid">
+            
+            <!-- Left: Station Leaderboard -->
+            <div class="stats-panel rank-panel">
+              <div class="panel-title">Station Leaderboard</div>
+              <div class="rank-list" id="statsRankList">
+                <div class="skeleton-row" style="height:35px; margin-bottom:8px;"></div>
+                <div class="skeleton-row" style="height:35px; margin-bottom:8px;"></div>
+                <div class="skeleton-row" style="height:35px; margin-bottom:8px;"></div>
+                <div class="skeleton-row" style="height:35px; margin-bottom:8px;"></div>
+                <div class="skeleton-row" style="height:35px; margin-bottom:8px;"></div>
+              </div>
+            </div>
+            
+            <!-- Right: Comparison Engine -->
+            <div class="stats-panel compare-panel">
+              <!-- Comparison view wrapper -->
+              <div id="stationCompareView">
+                <div class="panel-title">Station Comparison Builder</div>
+                <div class="compare-selectors">
+                  <div class="selector-item">
+                    <label for="stationSelectA">Station A</label>
+                    <select id="stationSelectA" class="station-select">
+                      <!-- Populated by JS -->
+                    </select>
+                  </div>
+                  <div class="selector-item">
+                    <label for="stationSelectB">Station B</label>
+                    <select id="stationSelectB" class="station-select">
+                      <!-- Populated by JS -->
+                    </select>
+                  </div>
+                  <button class="compare-btn" id="stationCompareBtn">Compare Stations</button>
+                </div>
+                
+                <!-- Comparison Results -->
+                <div class="compare-results" id="compareResults" style="display:none;">
+                  <!-- Populated by JS -->
+                </div>
+                
+                <!-- Placeholder -->
+                <div class="compare-placeholder" id="comparePlaceholder">
+                  <span>✦</span>
+                  <p>Select two police stations above and click "Compare" to view side-by-side analytics.</p>
+                </div>
+              </div>
+
+              <!-- Single Station Details View -->
+              <div class="station-detail-view" id="stationDetailView" style="display:none;">
+                <div class="detail-header-row">
+                  <div class="station-detail-title" id="stationDetailTitle">Station Analytics</div>
+                  <button class="back-to-compare-btn" id="backToCompareBtn" type="button">← Back to Comparison</button>
+                </div>
+                
+                <div class="station-metrics-grid">
+                  <div class="compare-card-stat">
+                    <span class="compare-stat-label">Total Events</span>
+                    <span class="compare-stat-val blue" id="stationDetailTotal">—</span>
+                  </div>
+                  <div class="compare-card-stat">
+                    <span class="compare-stat-label">Peak Traffic Hour</span>
+                    <span class="compare-stat-val" id="stationDetailPeak">—</span>
+                  </div>
+                </div>
+
+                <!-- Monthly timeline chart -->
+                <div class="station-timeline-section">
+                  <div class="compare-sub-title">Monthly Event Timeline</div>
+                  <div class="station-chart-container">
+                    <canvas id="stationTimelineChart"></canvas>
+                  </div>
+                </div>
+
+                <!-- Distributions side-by-side -->
+                <div class="station-distribution-grid">
+                  <div class="compare-sub-section">
+                    <div class="compare-sub-title">Dominant Event Causes</div>
+                    <div class="compare-progress-list" id="stationDetailViolations">
+                      <!-- Progress bars populated by JS -->
+                    </div>
+                  </div>
+                  <div class="compare-sub-section">
+                    <div class="compare-sub-title">Vehicle Profiles</div>
+                    <div class="compare-progress-list" id="stationDetailVehicles">
+                      <!-- Progress bars populated by JS -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            
+          </div><!-- /stats-grid -->
+          
+        </div>
+      </section>
+    </div>
+
+  </div><!-- /app -->
+
+  <!-- ═══ Scripts ══════════════════════════════════════ -->
+  <!-- Leaflet JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <!-- Leaflet Heatmap Plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+  <!-- Chart.js v4 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- App Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Density Heatmap</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'IBM Plex Sans', 'Outfit', system-ui, sans-serif;
+      background: #f8f9fa;
+      color: #1a1d23;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Map ──────────────────────────────────── */
+    #map {
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+      z-index: 1;
+    }
+
+    /* ── Controls Panel (below map) ──────────── */
+    #controls {
+      flex: 0 0 auto;
+      background: #ffffff;
+      border-top: 1px solid #e2e6ea;
+      padding: 8px 16px 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: nowrap;
+    }
+
+    .ctrl-section {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ctrl-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+
+    .ctrl-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #4b5563;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .ctrl-val {
+      font-size: 10px;
+      font-weight: 700;
+      color: #2563eb;
+      background: #eff6ff;
+      padding: 1px 6px;
+      border-radius: 12px;
+    }
+
+    input[type="range"].slider {
+      width: 100%;
+      accent-color: #2563eb;
+      cursor: pointer;
+      height: 4px;
+      margin: 2px 0;
+    }
+
+    .tick-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 8px;
+      color: #9ca3af;
+      margin-top: 1px;
+    }
+
+    /* gradient legend */
+    .legend-section {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .legend-label {
+      font-size: 9px;
+      color: #6b7280;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .legend-bar {
+      width: 120px;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(to right, #3b82f6, #8b5cf6, #f59e0b, #ef4444, #ff0000);
+    }
+
+    /* stats */
+    .stat-chips {
+      display: flex;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .stat-chip {
+      text-align: center;
+      min-width: 70px;
+    }
+
+    .stat-num {
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .stat-desc {
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #6b7280;
+      font-weight: 600;
+      margin-top: 1px;
+    }
+
+    .blue  { color: #2563eb; }
+    .amber { color: #f59e0b; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="map"></div>
+
+    <div id="controls">
+      <!-- Timeline Slider -->
+      <div class="ctrl-section" style="max-width: 320px;">
+        <div class="ctrl-label-row">
+          <span class="ctrl-label">Time Filter</span>
+          <span class="ctrl-val" id="timelineVal">All Data</span>
+        </div>
+        <input type="range" id="timelineSlider" min="0" max="6" step="1" value="0" class="slider">
+        <div class="tick-row">
+          <span>All</span><span>Nov</span><span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span>
+        </div>
+      </div>
+
+      <!-- Gradient legend -->
+      <div class="legend-section">
+        <span class="legend-label">Low Density</span>
+        <div class="legend-bar"></div>
+        <span class="legend-label">High Density</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-chips">
+        <div class="stat-chip">
+          <div class="stat-num blue" id="statTotal">—</div>
+          <div class="stat-desc">Total Events</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-num amber" id="statPoints">—</div>
+          <div class="stat-desc">Hotspots</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <!-- Leaflet Heat Plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const API_BASE = 'http://localhost:8000';
+
+      const MONTHS = [
+        { label: 'All Data',  value: 'all'     },
+        { label: 'Nov 2023',  value: '2023-11' },
+        { label: 'Dec 2023',  value: '2023-12' },
+        { label: 'Jan 2024',  value: '2024-01' },
+        { label: 'Feb 2024',  value: '2024-02' },
+        { label: 'Mar 2024',  value: '2024-03' },
+        { label: 'Apr 2024',  value: '2024-04' },
+      ];
+
+      const state = {
+        map: null,
+        heatLayer: null,
+        heatmapData: [],
+        currentIdx: 0,
+      };
+
+      function fmt(n) {
+        if (n === null || n === undefined || isNaN(n)) return '—';
+        return Number(n).toLocaleString();
+      }
+
+      // ── Init map ────────────────────────────────────────
+      function initMap() {
+        const bangaloreBounds = L.latLngBounds([12.8, 77.4], [13.1, 77.8]);
+        state.map = L.map('map', {
+          center: [12.97883, 77.59953],
+          zoom: 12,
+          zoomControl: true,
+          attributionControl: true,
+          maxBounds: bangaloreBounds,
+          maxBoundsViscosity: 0.8,
+          minZoom: 11
+        });
+
+        // Light mode tiles
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; <a href="https://carto.com/">CARTO</a> · &copy; <a href="https://www.openstreetmap.org/">OSM</a>',
+          subdomains: 'abcd',
+          maxZoom: 19,
+        }).addTo(state.map);
+      }
+
+      // ── Heatmap rendering ────────────────────────────────
+      function renderHeatmap() {
+        if (!state.map) return;
+
+        if (state.heatLayer) {
+          state.map.removeLayer(state.heatLayer);
+          state.heatLayer = null;
+        }
+
+        const mapping = MONTHS[state.currentIdx] || MONTHS[0];
+        const valEl = document.getElementById('timelineVal');
+        if (valEl) valEl.textContent = mapping.label;
+
+        let points = [];
+        let totalIntensity = 0;
+
+        if (mapping.value === 'all') {
+          const coordMap = {};
+          state.heatmapData.forEach(p => {
+            const k = `${(+p.lat).toFixed(3)},${(+p.lon).toFixed(3)}`;
+            coordMap[k] = (coordMap[k] || 0) + (p.intensity || 1);
+          });
+          for (const k in coordMap) {
+            const [la, lo] = k.split(',');
+            points.push([parseFloat(la), parseFloat(lo), coordMap[k]]);
+            totalIntensity += coordMap[k];
+          }
+        } else {
+          state.heatmapData.forEach(p => {
+            if (p.month === mapping.value) {
+              points.push([+p.lat, +p.lon, p.intensity || 1]);
+              totalIntensity += (p.intensity || 1);
+            }
+          });
+        }
+
+        document.getElementById('statTotal').textContent  = fmt(totalIntensity);
+        document.getElementById('statPoints').textContent = fmt(points.length);
+
+        if (points.length === 0) return;
+
+        const maxI = Math.max(...points.map(p => p[2]));
+
+        // Adjusting radius and blur to be smaller and more localised
+        // Tweak gradient and minOpacity to suppress wide light blue leakage
+        state.heatLayer = L.heatLayer(points, {
+          radius: 10,
+          blur: 7,
+          maxZoom: 15,
+          minOpacity: 0.15,
+          max: maxI * 0.9,
+          gradient: { 
+            0.35: '#3b82f6', 
+            0.60: '#8b5cf6', 
+            0.80: '#f59e0b', 
+            0.95: '#ef4444', 
+            1.00: '#ff0000' 
+          },
+        }).addTo(state.map);
+      }
+
+      // ── Fetching Data ─────────────────────────────────────
+      async function fetchData() {
+        document.getElementById('statTotal').textContent = '…';
+        try {
+          const heatRes = await fetch(`${API_BASE}/api/heatmap`);
+          if (heatRes.ok) {
+            state.heatmapData = await heatRes.json();
+            renderHeatmap();
+          }
+        } catch (e) {
+          console.error('fetchData error:', e);
+          document.getElementById('statTotal').textContent = 'Error';
+        }
+      }
+
+      // ── Sliders ──────────────────────────────────────────
+      function initControls() {
+        const timeSlider = document.getElementById('timelineSlider');
+        if (timeSlider) {
+          timeSlider.addEventListener('input', () => {
+            state.currentIdx = parseInt(timeSlider.value, 10);
+            renderHeatmap();
+          });
+        }
+      }
+
+      // ── Boot ─────────────────────────────────────────────
+      document.addEventListener('DOMContentLoaded', () => {
+        initMap();
+        initControls();
+        fetchData();
+      });
+
+    })();
+  </script>
+</body>
+</html>
