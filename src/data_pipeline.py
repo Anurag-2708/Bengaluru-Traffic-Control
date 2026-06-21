@@ -3,11 +3,13 @@ import pandas as pd
 import numpy as np
 import json
 
-# File paths
-RAW_DATA_PATH = "data/Astram_data.csv"
-POST_EVENT_LOGS_PATH = "data/post_event_logs.csv"
-MAPPINGS_PATH = "data/feature_mappings.json"
-STATIONS_PATH = "data/police_stations.json"
+# File paths resolved dynamically relative to the project root
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+RAW_DATA_PATH = os.path.join(PROJECT_ROOT, "data", "Astram_data.csv")
+POST_EVENT_LOGS_PATH = os.path.join(PROJECT_ROOT, "data", "post_event_logs.csv")
+MAPPINGS_PATH = os.path.join(PROJECT_ROOT, "data", "feature_mappings.json")
+STATIONS_PATH = os.path.join(PROJECT_ROOT, "data", "police_stations.json")
 
 def calculate_police_stations(df):
     """

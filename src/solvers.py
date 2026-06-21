@@ -7,7 +7,8 @@ import networkx as nx
 import google.generativeai as genai
 from src.osm_parser import haversine_distance
 
-GEMINI_CACHE_PATH = "data/gemini_cache.json"
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+GEMINI_CACHE_PATH = os.path.join(PROJECT_ROOT, "data", "gemini_cache.json")
 
 class AllocationSolver:
     @staticmethod
@@ -119,7 +120,9 @@ class AllocationSolver:
         return {"allocations": results}
 
 class RoutingSolver:
-    def __init__(self, cache_path="data/road_network.gpickle"):
+    def __init__(self, cache_path=None):
+        if cache_path is None:
+            cache_path = os.path.join(PROJECT_ROOT, "data", "road_network.gpickle")
         self.cache_path = cache_path
         self.G = None
         self.load_graph()

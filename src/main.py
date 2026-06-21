@@ -16,9 +16,12 @@ from src.train_models import train_and_save_models
 
 app = FastAPI(title="GridAI Emergency Response API", version="1.0.0")
 
+origins_env = os.environ.get("CORS_ORIGINS")
+origins = [o.strip() for o in origins_env.split(",")] if origins_env else ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,7 +35,8 @@ active_events = {}
 routing_solver = None
 gemini_recommender = GeminiRecommender()
 
-ACTIVE_EVENTS_PATH = "data/active_events.json"
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+ACTIVE_EVENTS_PATH = os.path.join(PROJECT_ROOT, "data", "active_events.json")
 
 @app.on_event("startup")
 def startup_event():
@@ -40,10 +44,10 @@ def startup_event():
     
     # Load models
     model_paths = {
-        "lgb_dur": "models/lgb_dur.pkl",
-        "xgb_dur": "models/xgb_dur.pkl",
-        "lgb_sev": "models/lgb_sev.pkl",
-        "xgb_sev": "models/xgb_sev.pkl",
+        "lgb_dur": os.path.join(PROJECT_ROOT, "models", "lgb_dur.pkl"),
+        "xgb_dur": os.path.join(PROJECT_ROOT, "models", "xgb_dur.pkl"),
+        "lgb_sev": os.path.join(PROJECT_ROOT, "models", "lgb_sev.pkl"),
+        "xgb_sev": os.path.join(PROJECT_ROOT, "models", "xgb_sev.pkl"),
     }
     for name, path in model_paths.items():
         if os.path.exists(path):
@@ -388,7 +392,7 @@ def get_mappings():
 
 @app.get("/feature_importance")
 def get_feature_importance():
-    path = "data/feature_importance.json"
+    path = os.path.join(PROJECT_ROOT, "data", "feature_importance.json")
     if os.path.exists(path):
         with open(path, "r") as f:
             return json.load(f)
@@ -396,7 +400,7 @@ def get_feature_importance():
 
 @app.get("/historical_events")
 def get_historical_events():
-    path = "data/Astram_data.csv"
+    path = os.path.join(PROJECT_ROOT, "data", "Astram_data.csv")
     if os.path.exists(path):
         try:
             df = pd.read_csv(path)
@@ -628,7 +632,7 @@ def get_archives():
 
 @app.get("/model_metrics")
 def get_model_metrics():
-    path = "data/model_metrics.json"
+    path = os.path.join(PROJECT_ROOT, "data", "model_metrics.json")
     if os.path.exists(path):
         with open(path, "r") as f:
             return json.load(f)
@@ -636,7 +640,7 @@ def get_model_metrics():
 
 @app.get("/response_card_options")
 def get_response_card_options():
-    path = "data/Astram_data.csv"
+    path = os.path.join(PROJECT_ROOT, "data", "Astram_data.csv")
     if not os.path.exists(path):
         return {"corridors": [], "time_slots": ["Morning Rush (8-12 AM)", "Afternoon (12-4 PM)", "Evening Rush (4-9 PM)", "Night (9 PM-8 AM)"]}
     try:
@@ -659,7 +663,7 @@ def get_response_card(
     latitude: Optional[float] = None,
     longitude: Optional[float] = None
 ):
-    path = "data/Astram_data.csv"
+    path = os.path.join(PROJECT_ROOT, "data", "Astram_data.csv")
     if not os.path.exists(path):
         raise HTTPException(status_code=404, detail="Astram dataset not found.")
         

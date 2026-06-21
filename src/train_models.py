@@ -11,9 +11,10 @@ import shap
 
 from src.data_pipeline import load_and_clean_data, engineer_features, get_train_features
 
-MODELS_DIR = "models"
-METRICS_PATH = "data/model_metrics.json"
-IMPORTANCE_PATH = "data/feature_importance.json"
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+MODELS_DIR = os.path.join(PROJECT_ROOT, "models")
+METRICS_PATH = os.path.join(PROJECT_ROOT, "data", "model_metrics.json")
+IMPORTANCE_PATH = os.path.join(PROJECT_ROOT, "data", "feature_importance.json")
 
 def evaluate_multicollinearity(X):
     """
@@ -68,13 +69,13 @@ def train_and_save_models(include_post_events=True):
     xgb_sev.fit(X_train, y_sev_train)
     
     # Save models
-    with open(f"{MODELS_DIR}/lgb_dur.pkl", "wb") as f:
+    with open(os.path.join(MODELS_DIR, "lgb_dur.pkl"), "wb") as f:
         pickle.dump(lgb_dur, f)
-    with open(f"{MODELS_DIR}/xgb_dur.pkl", "wb") as f:
+    with open(os.path.join(MODELS_DIR, "xgb_dur.pkl"), "wb") as f:
         pickle.dump(xgb_dur, f)
-    with open(f"{MODELS_DIR}/lgb_sev.pkl", "wb") as f:
+    with open(os.path.join(MODELS_DIR, "lgb_sev.pkl"), "wb") as f:
         pickle.dump(lgb_sev, f)
-    with open(f"{MODELS_DIR}/xgb_sev.pkl", "wb") as f:
+    with open(os.path.join(MODELS_DIR, "xgb_sev.pkl"), "wb") as f:
         pickle.dump(xgb_sev, f)
         
     # Evaluate Predictions

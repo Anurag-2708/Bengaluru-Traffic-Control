@@ -6,7 +6,7 @@ import {
   RefreshCw, ChevronDown, ChevronUp, FileText, TrendingUp, Search
 } from 'lucide-react';
 
-const API_URL = "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 // Extended preset locations covering major Bangalore roads & corridors from dataset
 const LOCATION_PRESETS = [
@@ -928,7 +928,6 @@ export default function App() {
             { id: 'density', label: 'Density Map', icon: <Activity size={15} /> },
             { id: 'response-cards', label: 'Response Cards', icon: <FileText size={15} /> },
             { id: 'archives', label: 'Archives', icon: <Archive size={15} /> },
-            { id: 'model-performance', label: 'Model Performance', icon: <TrendingUp size={15} /> },
           ].map(({ id, label, icon }) => (
             <button key={id} className={`nav-tab ${activeTab === id ? 'active' : ''}`} onClick={() => setActiveTab(id)}>
               {icon} {label}
@@ -1560,130 +1559,7 @@ export default function App() {
           </div>
         )}
 
-        {/* ── TAB 7: MODEL PERFORMANCE ── */}
-        {activeTab === 'model-performance' && (
-          <div>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.3rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <TrendingUp size={20} /> Model Performance
-              </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: '0.25rem' }}>
-                Evaluation metrics and feature importance for the trained ML models.
-              </p>
-            </div>
 
-            {/* Duration Model */}
-            <div className="card" style={{ marginBottom: '1.5rem' }}>
-              <h4 style={{ fontWeight: 700, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem' }}>
-                ⏱ Duration Prediction Model (Ensemble: LightGBM + XGBoost)
-              </h4>
-              {modelMetrics.duration && (
-                <div>
-                  <div className="metrics-row" style={{ marginBottom: '1.25rem' }}>
-                    {[
-                      ['LGB MAE', `${modelMetrics.duration.lgb?.mae?.toFixed(1)} min`],
-                      ['XGB MAE', `${modelMetrics.duration.xgb?.mae?.toFixed(1)} min`],
-                      ['Ensemble MAE', `${modelMetrics.duration.ensemble?.mae?.toFixed(1)} min`],
-                      ['Ensemble R²', modelMetrics.duration.ensemble?.r2?.toFixed(4)],
-                    ].map(([k, v]) => (
-                      <div key={k} className="metric-card" style={{ flex: 1 }}>
-                        <div className="metric-value" style={{ fontSize: '1.3rem', color: 'var(--primary)' }}>{v}</div>
-                        <div className="metric-label">{k}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Feature Importance */}
-              {Object.keys(featureImportance).length > 0 && (
-                <div style={{ marginTop: '0.5rem' }}>
-                  <h5 style={{ fontWeight: 700, marginBottom: '1rem', fontSize: '0.9rem' }}>📊 Feature Importance</h5>
-                  {Object.entries(featureImportance)
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([feat, score]) => (
-                      <div key={feat} style={{ marginBottom: '0.6rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.2rem' }}>
-                          <span style={{ textTransform: 'capitalize', color: 'var(--text-main)' }}>{feat.replace(/_/g, ' ')}</span>
-                          <span style={{ color: 'var(--primary)' }}>{(score * 100).toFixed(1)}%</span>
-                        </div>
-                        <div style={{ background: '#E9ECEF', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
-                          <div style={{
-                            background: `linear-gradient(90deg, var(--primary), var(--secondary))`,
-                            height: '100%', width: `${Math.min(100, score * 100)}%`,
-                            borderRadius: '4px', transition: 'width 0.6s ease'
-                          }} />
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              )}
-            </div>
-
-            {/* Severity Model */}
-            <div className="card" style={{ marginBottom: '1.5rem' }}>
-              <h4 style={{ fontWeight: 700, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem' }}>
-                🔥 Severity Prediction Model (Ensemble)
-              </h4>
-              {modelMetrics.severity && (
-                <div className="metrics-row">
-                  {[
-                    ['LGB MAE', modelMetrics.severity.lgb?.mae?.toFixed(3)],
-                    ['XGB MAE', modelMetrics.severity.xgb?.mae?.toFixed(3)],
-                    ['Ensemble MAE', modelMetrics.severity.ensemble?.mae?.toFixed(3)],
-                    ['Ensemble R²', modelMetrics.severity.ensemble?.r2?.toFixed(4)],
-                    ['Ensemble RMSE', modelMetrics.severity.ensemble?.rmse?.toFixed(3)],
-                  ].map(([k, v]) => (
-                    <div key={k} className="metric-card" style={{ flex: 1 }}>
-                      <div className="metric-value" style={{ fontSize: '1.3rem', color: 'var(--secondary)' }}>{v}</div>
-                      <div className="metric-label">{k}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Feature Correlation Heatmap-style */}
-            {modelMetrics.correlations && (
-              <div className="card">
-                <h4 style={{ fontWeight: 700, marginBottom: '1rem', fontSize: '1rem' }}>🔗 Feature Correlations</h4>
-                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                  Pairwise Pearson correlation between engineered features.
-                </p>
-                <div style={{ overflowX: 'auto' }}>
-                  <table className="table" style={{ fontSize: '0.72rem' }}>
-                    <thead>
-                      <tr>
-                        <th></th>
-                        {Object.keys(modelMetrics.correlations).map(feat => (
-                          <th key={feat} style={{ padding: '0.4rem', transform: 'rotate(-40deg)', transformOrigin: 'bottom left', whiteSpace: 'nowrap', height: '80px', verticalAlign: 'bottom' }}>
-                            {feat.replace(/_/g, ' ')}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Object.entries(modelMetrics.correlations).map(([rowFeat, cols]) => (
-                        <tr key={rowFeat}>
-                          <td style={{ fontWeight: 600, fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{rowFeat.replace(/_/g, ' ')}</td>
-                          {Object.entries(cols).map(([colFeat, val]) => {
-                            const abs = Math.abs(val);
-                            const bg = val === 1 ? '#1565C0' : abs > 0.3 ? `rgba(255,75,43,${abs})` : `rgba(40,167,69,${abs * 2})`;
-                            return (
-                              <td key={colFeat} style={{ background: bg, color: abs > 0.3 ? 'white' : 'inherit', textAlign: 'center', padding: '4px', minWidth: '42px' }}>
-                                {val.toFixed(2)}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
 
       </main>
 

@@ -31,9 +31,10 @@ except ImportError:
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-CSV_PATH = os.getenv("CSV_PATH", "../../Astram event data_anonymized - Astram event data_anonymizedb40ac87.csv")
-# Resolve relative paths against this file's directory
-_csv_resolved = (Path(__file__).resolve().parent / CSV_PATH).resolve()
+# Resolve relative paths against project root
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+CSV_PATH = os.getenv("CSV_PATH", "data/Astram_data.csv")
+_csv_resolved = (PROJECT_ROOT / CSV_PATH).resolve()
 
 logger = logging.getLogger("data_engine")
 logging.basicConfig(level=logging.INFO)
