@@ -33,15 +33,25 @@ The backend runs as a Python FastAPI application. Because it requires heavy libr
 We have configured a `Dockerfile` to guarantee that all system and python dependencies (including `osmium` bindings) install seamlessly inside a container.
 
 ### Option A: Deploy on Render.com (Recommended & Free)
+
+#### Method 1: Blueprint Deployment (One-Click, Recommended)
+1. Sign in to the [Render Dashboard](https://dashboard.render.com).
+2. Click **New** > **Blueprint**.
+3. Connect your Git repository and select the `deployment` branch.
+4. Render will automatically read the root [render.yaml](render.yaml) file to configure the service name, Docker runtime, free plan, and port `8000` automatically.
+5. Enter your `GEMINI_API_KEY` if prompted.
+6. Click **Approve** to build and deploy. Once complete, Render will provide the web service URL (e.g., `https://bengaluru-traffic-backend.onrender.com`). Use this URL as `VITE_API_URL` in Vercel.
+
+#### Method 2: Manual Web Service Deployment
 1. Sign in to the [Render Dashboard](https://dashboard.render.com).
 2. Click **New** > **Web Service**.
 3. Connect your Git repository and select the `deployment` branch.
 4. **Choose Runtime:** Select **Docker** (Render will automatically detect the [Dockerfile](Dockerfile) in the root and build it).
 5. **Configure Plan:** Choose the **Free** tier (or **Starter** for faster response times).
-6. **Environment Variables:** If you are using Google Gemini for recommendation generation, add your API key:
+6. **Environment Variables:** Add your API key if using Gemini:
    - **Key:** `GEMINI_API_KEY`
    - **Value:** `your-google-api-key`
-7. Click **Deploy Web Service**. Once the build finishes, Render will provide a URL (e.g., `https://bengaluru-traffic-backend.onrender.com`). Use this URL as the `VITE_API_URL` in your Vercel frontend configuration.
+7. Click **Deploy Web Service**. Once the build finishes, Render will provide the URL. Use this URL as the `VITE_API_URL` in your Vercel frontend configuration.
 
 ### Option B: Deploy on Railway.app
 1. Sign in to [Railway](https://railway.app).
