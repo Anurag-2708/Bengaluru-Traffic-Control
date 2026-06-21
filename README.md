@@ -45,6 +45,15 @@ We use `.env` files to configure options like ports and external API keys.
    * **`FRONTEND_PORT`**: Port to run the React dashboard (default: `8501`).
    * **`VITE_API_URL`**: URL pointing to your backend (default: `http://localhost:8000`).
 
+#### Step 3: Virtual Environment Setup
+
+Setup virtual environment and download dependencies.
+  ```bash
+  python -m venv venv
+  source venv/bin/activate  # On Windows: venv\Scripts\activate
+  pip install -r requirements.txt
+  ```
+
 ---
 
 ### Starting the Application
@@ -69,19 +78,6 @@ python run.py
 
 * **Frontend Dashboard (React):** Open [http://localhost:8501](http://localhost:8501) in your browser.
 * **Backend API Documentation (FastAPI):** Open [http://localhost:8000/docs](http://localhost:8000/docs) in your browser.
-
----
-
-### Common Troubleshooting
-
-* **Port Already in Use:** If you see an error like `Address already in use`, change `BACKEND_PORT` or `FRONTEND_PORT` inside `.env` to alternative ports (e.g. `8080` or `3000`).
-* **Missing npm Command:** If you receive a command not found error during startup, download and install Node.js from [nodejs.org](https://nodejs.org/).
-* **Python virtualenv Issues:** If backend packages are not loading, make sure your python virtual environment is initialized in `venv/` at the root of the project. If missing, recreate it:
-  ```bash
-  python -m venv venv
-  source venv/bin/activate  # On Windows: venv\Scripts\activate
-  pip install -r requirements.txt
-  ```
 
 ---
 
