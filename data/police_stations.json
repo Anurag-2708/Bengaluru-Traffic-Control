@@ -392,12 +392,12 @@
         "total_officers": 20,
         "total_barricades": 25,
         "total_vehicles": 6,
-        "available_officers": 12,
-        "deployed_officers": 8,
-        "available_barricades": 11,
-        "deployed_barricades": 14,
-        "available_vehicles": 3,
-        "deployed_vehicles": 3
+        "available_officers": 20,
+        "deployed_officers": 0,
+        "available_barricades": 25,
+        "deployed_barricades": 0,
+        "available_vehicles": 6,
+        "deployed_vehicles": 0
     },
     "Halasur": {
         "name": "Halasur",
