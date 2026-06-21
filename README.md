@@ -29,7 +29,7 @@ Ensure the following tools are installed on your machine:
 
 #### Step 1: Clone the Repository
 ```bash
-git clone https://github.com/your-username/Bengaluru-Traffic-Control.git
+git clone https://github.com/Anurag-2708/Bengaluru-Traffic-Control.git
 cd Bengaluru-Traffic-Control
 ```
 
