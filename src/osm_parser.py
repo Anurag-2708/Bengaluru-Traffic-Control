@@ -1,7 +1,12 @@
 import os
 import pickle
 import math
-import osmium
+try:
+    import osmium
+    HAS_OSMIUM = True
+except ImportError:
+    osmium = None
+    HAS_OSMIUM = False
 import networkx as nx
 
 # Bounding box of the dataset
@@ -18,52 +23,58 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     c = 2 * math.asin(math.sqrt(a))
     return R * c
 
-class RoadNetworkHandler(osmium.SimpleHandler):
-    def __init__(self):
-        super(RoadNetworkHandler, self).__init__()
-        self.nodes = {}  # node_id -> (lat, lon)
-        self.ways = []   # list of way dicts
-        self.valid_highways = {'motorway', 'trunk', 'primary', 'secondary', 'tertiary'}
-        
-        # Default speeds in km/h for Bangalore road types
-        self.default_speeds = {
-            'motorway': 80.0,
-            'trunk': 60.0,
-            'primary': 50.0,
-            'secondary': 40.0,
-            'tertiary': 30.0
-        }
-        
-    def node(self, n):
-        # Cache all node coordinates within the bounding box
-        lat = n.location.lat
-        lon = n.location.lon
-        if MIN_LAT <= lat <= MAX_LAT and MIN_LON <= lon <= MAX_LON:
-            self.nodes[n.id] = (lat, lon)
+if HAS_OSMIUM:
+    class RoadNetworkHandler(osmium.SimpleHandler):
+        def __init__(self):
+            super(RoadNetworkHandler, self).__init__()
+            self.nodes = {}  # node_id -> (lat, lon)
+            self.ways = []   # list of way dicts
+            self.valid_highways = {'motorway', 'trunk', 'primary', 'secondary', 'tertiary'}
             
-    def way(self, w):
-        highway = w.tags.get('highway')
-        if highway in self.valid_highways:
-            way_id = w.id
-            name = w.tags.get('name', f"Way {way_id}")
-            oneway = w.tags.get('oneway', 'no') in ('yes', 'true', '1')
+            # Default speeds in km/h for Bangalore road types
+            self.default_speeds = {
+                'motorway': 80.0,
+                'trunk': 60.0,
+                'primary': 50.0,
+                'secondary': 40.0,
+                'tertiary': 30.0
+            }
             
-            # Speed limit parsing
-            maxspeed_str = w.tags.get('maxspeed', '')
-            try:
-                maxspeed = float(''.join(filter(str.isdigit, maxspeed_str)))
-            except ValueError:
-                maxspeed = self.default_speeds.get(highway, 40.0)
+        def node(self, n):
+            # Cache all node coordinates within the bounding box
+            lat = n.location.lat
+            lon = n.location.lon
+            if MIN_LAT <= lat <= MAX_LAT and MIN_LON <= lon <= MAX_LON:
+                self.nodes[n.id] = (lat, lon)
                 
-            way_nodes = [node.ref for node in w.nodes]
-            self.ways.append({
-                'id': way_id,
-                'nodes': way_nodes,
-                'name': name,
-                'highway': highway,
-                'maxspeed': maxspeed,
-                'oneway': oneway
-            })
+        def way(self, w):
+            highway = w.tags.get('highway')
+            if highway in self.valid_highways:
+                way_id = w.id
+                name = w.tags.get('name', f"Way {way_id}")
+                oneway = w.tags.get('oneway', 'no') in ('yes', 'true', '1')
+                
+                # Speed limit parsing
+                maxspeed_str = w.tags.get('maxspeed', '')
+                try:
+                    maxspeed = float(''.join(filter(str.isdigit, maxspeed_str)))
+                except ValueError:
+                    maxspeed = self.default_speeds.get(highway, 40.0)
+                    
+                way_nodes = [node.ref for node in w.nodes]
+                self.ways.append({
+                    'id': way_id,
+                    'nodes': way_nodes,
+                    'name': name,
+                    'highway': highway,
+                    'maxspeed': maxspeed,
+                    'oneway': oneway
+                })
+else:
+    class RoadNetworkHandler:
+        def __init__(self):
+            raise ImportError("osmium is not installed. Map parsing is disabled.")
+
 
 def build_road_network_graph(pbf_path, cache_path="data/road_network.gpickle"):
     """
