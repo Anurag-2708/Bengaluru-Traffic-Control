@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from src.data_pipeline import engineer_features, load_and_clean_data, MAPPINGS_PATH, STATIONS_PATH, POST_EVENT_LOGS_PATH
 from src.solvers import AllocationSolver, RoutingSolver, GeminiRecommender
 from src.osm_parser import haversine_distance
-from src.train_models import train_and_save_models
+# train_and_save_models is imported lazily to save startup memory
 
 app = FastAPI(title="GridAI Emergency Response API", version="1.0.0")
 
@@ -90,8 +90,8 @@ def startup_event():
             print(f"Error loading active events: {e}")
             active_events.clear()
             
-    # Load routing graph
-    routing_solver = RoutingSolver()
+    # Load routing graph lazily (commented out to save startup memory)
+    # routing_solver = RoutingSolver()
 
 
 # Request/Response Schemas
@@ -326,6 +326,14 @@ def allocate(payload: AllocateRequest):
 
 @app.post("/divert")
 def divert(payload: DivertRequest):
+    global routing_solver
+    if routing_solver is None:
+        try:
+            print("Loading routing graph lazily...")
+            routing_solver = RoutingSolver()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to load routing graph: {str(e)}")
+            
     if not routing_solver:
         raise HTTPException(status_code=500, detail="Routing graph solver not initialized.")
         
@@ -347,6 +355,7 @@ def divert(payload: DivertRequest):
 def run_background_retrain():
     print("Starting background continuous learning model retrain...")
     try:
+        from src.train_models import train_and_save_models
         # Retrain and update models on disk
         metrics = train_and_save_models(include_post_events=True)
         # Reload models
