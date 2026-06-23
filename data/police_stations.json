@@ -712,12 +712,12 @@
         "total_officers": 20,
         "total_barricades": 25,
         "total_vehicles": 6,
-        "available_officers": 20,
-        "deployed_officers": 0,
-        "available_barricades": 25,
-        "deployed_barricades": 0,
-        "available_vehicles": 6,
-        "deployed_vehicles": 0
+        "available_officers": 9,
+        "deployed_officers": 11,
+        "available_barricades": 5,
+        "deployed_barricades": 20,
+        "available_vehicles": 4,
+        "deployed_vehicles": 2
     },
     "Basavanagudi": {
         "name": "Basavanagudi",
@@ -792,12 +792,12 @@
         "total_officers": 20,
         "total_barricades": 25,
         "total_vehicles": 6,
-        "available_officers": 20,
-        "deployed_officers": 0,
+        "available_officers": 14,
+        "deployed_officers": 6,
         "available_barricades": 25,
         "deployed_barricades": 0,
-        "available_vehicles": 6,
-        "deployed_vehicles": 0
+        "available_vehicles": 5,
+        "deployed_vehicles": 1
     },
     "Thalagattapura": {
         "name": "Thalagattapura",

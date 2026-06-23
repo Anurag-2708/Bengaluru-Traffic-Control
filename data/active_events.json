@@ -1,1 +1,56 @@
-{}
+{
+    "EV_0621_172141": {
+        "id": "EV_0621_172141",
+        "event_type": "unplanned",
+        "event_cause": "road_conditions",
+        "latitude": 12.896,
+        "longitude": 77.594,
+        "priority": "High",
+        "requires_road_closure": true,
+        "severity_index": 6.46,
+        "duration_mins": 344.46,
+        "congestion_level": "Moderate",
+        "impact_radius_km": 1.29,
+        "response_time_mins": 12.62,
+        "dispatches": [
+            {
+                "station_name": "J.P. Nagar",
+                "officers": 11,
+                "barricades": 20,
+                "vehicles": 2,
+                "transit_distance_km": 1.4
+            }
+        ],
+        "alternative_paths": [],
+        "start_datetime_ist": "2026-06-21T17:20:55.901Z",
+        "deployed_at": "2026-06-21T22:51:41.446620",
+        "status": "Live Event"
+    },
+    "EV_0621_172226": {
+        "id": "EV_0621_172226",
+        "event_type": "planned",
+        "event_cause": "protest",
+        "latitude": 12.88,
+        "longitude": 77.58,
+        "priority": "High",
+        "requires_road_closure": false,
+        "severity_index": 3.09,
+        "duration_mins": 187.2,
+        "congestion_level": "Low",
+        "impact_radius_km": 0.62,
+        "response_time_mins": 14.35,
+        "dispatches": [
+            {
+                "station_name": "Hulimavu",
+                "officers": 6,
+                "barricades": 0,
+                "vehicles": 1,
+                "transit_distance_km": 2.42
+            }
+        ],
+        "alternative_paths": [],
+        "start_datetime_ist": "2026-06-21T17:22:19.594Z",
+        "deployed_at": "2026-06-21T22:52:26.843029",
+        "status": "Live Event"
+    }
+}
